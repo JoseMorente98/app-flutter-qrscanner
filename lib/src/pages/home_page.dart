@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:app_flutter_qrscanner/src/bloc/scans_bloc.dart';
 import 'package:app_flutter_qrscanner/src/models/scan_model.dart';
 import 'package:app_flutter_qrscanner/src/pages/direcciones_page.dart';
 import 'package:app_flutter_qrscanner/src/pages/mapas_page.dart';
+import 'package:app_flutter_qrscanner/src/utils/utils.dart' as utils;
 import 'package:flutter/material.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 
@@ -30,7 +33,7 @@ class _HomePageState extends State<HomePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.filter_center_focus),
-        onPressed: _scanQR,
+        onPressed: () => _scanQR(context),
         backgroundColor: Theme.of(context).primaryColor,
       ),
     );
@@ -69,24 +72,33 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _scanQR() async {
-    String futureString = 'https://josemorente98.github.io/';
+  void _scanQR(BuildContext context) async {
+    String futureString = '';
     //https://josemorente98.github.io/
     //geo:14.642052302306546,-90.5137576146973
-    /*try {
+    try {
       futureString = await BarcodeScanner.scan();
     } catch (e) {
       futureString = futureString = e.toString();
     }
-    print("FUTURE " + futureString);*/
+    print("FUTURE " + futureString);
 
     if(futureString != null) {
       final scanModel = ScanModel( valor: futureString );
       //DBProvider.db.nuevoScan(scanModel);
       scansBloc.agregarScan(scanModel);
 
-      final scanModel2 = ScanModel( valor: 'geo:14.642052302306546,-90.5137576146973' );
-      scansBloc.agregarScan(scanModel2);
+      //final scanModel2 = ScanModel( valor: 'geo:14.642052302306546,-90.5137576146973' );
+      //scansBloc.agregarScan(scanModel2);
+
+
+      if(Platform.isIOS) {
+        Future.delayed(Duration(milliseconds: 750), () {
+          utils.abrirScan(context, scanModel);
+        });
+      } else {
+        utils.abrirScan(context, scanModel);
+      }
     }
   }
 }
